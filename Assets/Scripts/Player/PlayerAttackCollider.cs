@@ -7,10 +7,11 @@ namespace Player
     {
         private void OnTriggerEnter2D(Collider2D other)
         {
+            Debug.Log($"Player collided with {other.name}");
             if (other.TryGetComponent(out Enemy enemy))
             {
                 enemy.HandleDamage(PlayerAttack.CurrentAttackDamage);
             }
         }
     }
-}
+}            

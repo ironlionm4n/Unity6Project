@@ -1,4 +1,5 @@
 using System;
+using Player;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -20,11 +21,13 @@ public class PlayerMovement : MonoBehaviour
     private float _currentMoveSpeed;
     private float _slowdownTimer; // Tracks how long we've been slowed
     private bool _isSlowed;
+    private PlayerHealth _playerHealth;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        _playerHealth = GetComponent<PlayerHealth>();
     }
 
     private void OnEnable()
@@ -54,6 +57,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if(_playerHealth.RecoveringFromHit) return;
+        
         var movementInput = inputManager.MovementInput;
         _rb.linearVelocity = new Vector2(movementInput.x * _currentMoveSpeed, _rb.linearVelocity.y);
     }

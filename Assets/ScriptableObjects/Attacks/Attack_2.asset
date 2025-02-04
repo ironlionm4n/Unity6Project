@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Attack_2
   m_EditorClassIdentifier: Assembly-CSharp::AttackSequenceData
   attackType: 1
-  staminaCost: 0
+  staminaCost: 0.075
   damage: 10

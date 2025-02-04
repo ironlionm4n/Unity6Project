@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Cross_Slice
   m_EditorClassIdentifier: 
   attackType: 2
-  staminaCost: 0
+  staminaCost: 0.1
   damage: 20

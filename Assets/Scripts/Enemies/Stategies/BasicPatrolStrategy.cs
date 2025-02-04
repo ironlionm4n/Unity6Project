@@ -11,11 +11,25 @@ namespace Enemies.Stategies
         private bool _isWalking;
         private float _moveDirection; // -1 for left, 1 for right
         private readonly float _raycastDistance = 2f;
+        private int _walkCount;
+        private float _walkCountTimer;
+        private float _walkCountDuration = 2f;
         
         public void Execute(Enemy enemy)
         {
             if (_isWalking)
             {
+                _walkCountTimer += Time.deltaTime;
+                if (_walkCountTimer >= _walkCountDuration)
+                {
+                    _walkCountTimer = 0;
+                    _walkCount++;
+                    if (_walkCount >= 2)
+                    {
+                        enemy.ChangeToAttackStrategy();
+                        return;
+                    }
+                }
                 _walkTimer += Time.deltaTime;
                 Move(enemy, _moveDirection);
 
@@ -56,7 +70,7 @@ namespace Enemies.Stategies
         {
             Vector2 raycastOrigin = new Vector2(transformPosition.x, transformPosition.y);
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, Vector2.right * moveDirection, _raycastDistance, enemy.ObstacleLayer);
-            Debug.DrawRay( raycastOrigin, Vector2.right * moveDirection * _raycastDistance, Color.red);
+            Debug.DrawRay( raycastOrigin, Vector2.right * (moveDirection * _raycastDistance), Color.red);
             return hit.collider != null;
         }
 
@@ -66,7 +80,6 @@ namespace Enemies.Stategies
             _idleTimer = 0;
             _walkTimer = 0;
             _isWalking = false;
-            enemy.SetIsWalkingTrue();
             RandomizeMoveDirection(enemy);
         }
 
@@ -84,14 +97,19 @@ namespace Enemies.Stategies
 
         public void OnExit(Enemy enemy)
         {
+            StopWalking(enemy);
+        }
+
+        private void StopWalking(Enemy enemy)
+        {
+            _isWalking = false;
             enemy.SetIsWalkingFalse();
         }
-        
+
         public void OnAttackReceived(Enemy enemy)
         {
             // Do nothing
-            _isWalking = false;
-            enemy.SetIsWalkingFalse();
+            StopWalking(enemy);
             enemy.GetRigidbody2D.linearVelocity = Vector2.zero;
             _idleTimer = 0;
             _idleDuration = 0.75f;

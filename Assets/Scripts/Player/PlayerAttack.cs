@@ -101,7 +101,7 @@ public class PlayerAttack : MonoBehaviour
         // Perform the attack:
         // 1. Deduct stamina
         _stamina -= currentAttackData.staminaCost;
-        staminaFill.fillAmount = _stamina / maxStamina;
+        staminaFill.fillAmount = GetRatioOfMaxStamina();
         _staminaRefillTimer = 0f; // reset refill timer since we just attacked
         _currentAttackDamage = currentAttackData.damage;
 
@@ -137,10 +137,15 @@ public class PlayerAttack : MonoBehaviour
         _attackSequenceTimer = 0f;
     }
 
+    public float GetRatioOfMaxStamina()
+    {
+        return _stamina / maxStamina;
+    }
+
     private IEnumerator DisableDamageColliderRoutine()
     {
         _isAttacking = true;
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.215f);
         _isAttacking = false;
         DisableDamageCollider();
     }

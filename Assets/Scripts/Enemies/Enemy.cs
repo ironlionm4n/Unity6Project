@@ -19,6 +19,7 @@ public class Enemy : MonoBehaviour
     private Rigidbody2D _rigidbody2D;
     private Collider2D _collider2D;
     private static readonly int Death = Animator.StringToHash("Death");
+    private static readonly int Attack = Animator.StringToHash("Attack");
     public Rigidbody2D GetRigidbody2D => _rigidbody2D;
     public LayerMask ObstacleLayer => obstacleLayer;
     public Collider2D GetCollider2D => _collider2D;
@@ -120,5 +121,15 @@ public class Enemy : MonoBehaviour
             var direction = other.transform.position - visualCenter.position;
             playerHealth.HandleDamage(10f, direction.normalized.x);
         }
+    }
+
+    public void TriggerAttack()
+    {
+        _animator.SetTrigger(Attack);
+    }
+    
+    public void ChangeToAttackStrategy()
+    {
+        ChangeStrategy(new BasicAttackStrategy());
     }
 }
