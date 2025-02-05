@@ -7,7 +7,7 @@ namespace Enemies.Stategies
     public class BasicAttackStrategy : IEnemyStrategy
     {
         private ProjectileSpawner _projectileSpawner;
-        private float _delay = .66f; // Bad because this is not flexible for different enemies
+        private float _delay = 1f; // Bad because this is not flexible for different enemies
         private float _timer = 0f;
         private bool _isSpawning;
         private float _attackDuration = 2f;
@@ -52,6 +52,7 @@ namespace Enemies.Stategies
         {
             _isSpawning = false;
             _attackDuration = 2f;
+            _timer = 0;
         }
     }
 }

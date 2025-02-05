@@ -14,7 +14,17 @@ namespace Enemies.Stategies
         private int _walkCount;
         private float _walkCountTimer;
         private float _walkCountDuration = 2f;
-        
+
+        public BasicPatrolStrategy(float wallRayLength)
+        {
+            _raycastDistance = wallRayLength;
+        }
+
+        public BasicPatrolStrategy()
+        {
+            
+        }
+
         public void Execute(Enemy enemy)
         {
             if (_isWalking)

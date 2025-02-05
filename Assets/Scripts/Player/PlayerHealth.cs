@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Player
 {
@@ -8,9 +10,14 @@ namespace Player
         [SerializeField] private float knockbackForce;
         [SerializeField] private Color hurtColor;
         [SerializeField] private float hurtDuration;
+        [SerializeField] private AudioSource hurtSound;
+        [SerializeField] private Image healthFill;
         
         private SpriteRenderer _spriteRenderer;
         private Rigidbody2D _rigidbody2D;
+        private float _currentHealth;
+        private float _targetFill;
+        [SerializeField] private float fillSpeed;
         public bool RecoveringFromHit { get; set; }
 
         private void Awake()
@@ -19,13 +26,24 @@ namespace Player
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         }
         
+        private void Start()
+        {
+            _currentHealth = health;
+        }
+
+        private void Update()
+        {
+            healthFill.fillAmount = Mathf.Lerp(healthFill.fillAmount, _targetFill, Time.deltaTime * fillSpeed);
+        }
+
         public void HandleDamage(float damage, float horizontalComponent)
         {
             FlashHurtColor();
-            health -= damage;
-            Debug.Log($"Player health: {health}");
+            _currentHealth -= damage;
+            CalculateRatioOfHealth();
+            Debug.Log($"Player health: {_currentHealth}");
             Debug.Log($"Horiz Component: {horizontalComponent}");
-            if (health <= 0)
+            if (_currentHealth <= 0)
             {
                 Die();
             }
@@ -38,6 +56,7 @@ namespace Player
 
         private void FlashHurtColor()
         {
+            hurtSound.PlayOneShot(hurtSound.clip);
             _spriteRenderer.color = hurtColor;
             Invoke(nameof(ResetColor), hurtDuration);
         }
@@ -51,6 +70,21 @@ namespace Player
         private void Die()
         {
             Debug.Log("Player died");
+        }
+        
+        private void CalculateRatioOfHealth()
+        {
+            // 1 * (current health / max health) = ratio of health remaining (0-1) 
+            // max fill of the image is 1, this calculates the ratio of health remaining from 0-1
+            _targetFill = 1 * (_currentHealth / health);
+            // Clamp the fill amount to 0-1
+            _targetFill = Mathf.Clamp(_targetFill, 0, 1);
+        }
+        
+        public void GainHealth(float amount)
+        {
+            _currentHealth += amount;
+            CalculateRatioOfHealth();
         }
     }
 }

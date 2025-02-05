@@ -9,6 +9,7 @@ public class PlayerJump : MonoBehaviour
     [SerializeField] private float jumpForce = 10f;
     [SerializeField] private float downForceIncreaseRate = 2f;
     [SerializeField] private float maxDownForce = 10f;
+    [SerializeField] private AudioSource jumpSound;
     private bool _isJumping;
     private Rigidbody2D _rb;
     private float _downForce = 0f;
@@ -56,6 +57,7 @@ public class PlayerJump : MonoBehaviour
     private void Jump()
     {
         _isJumping = true;
+        jumpSound.PlayOneShot(jumpSound.clip);
         _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
     }
     

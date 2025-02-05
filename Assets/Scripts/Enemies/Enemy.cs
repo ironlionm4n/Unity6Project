@@ -10,6 +10,8 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float invulnerabilityTime = 0.75f;
     [SerializeField] private float health = 100f;
     [SerializeField] private Transform visualCenter;
+    [SerializeField] private float wallRayLength;
+    
     private Animator _animator;
     private static readonly int Damage = Animator.StringToHash("Damage");
     private static readonly int IsWalking = Animator.StringToHash("IsWalking");
@@ -33,7 +35,7 @@ public class Enemy : MonoBehaviour
 
     private void Start()
     {
-        ChangeStrategy(new BasicPatrolStrategy());
+        ChangeStrategy(new BasicPatrolStrategy(wallRayLength));
     }
 
     private void Update()

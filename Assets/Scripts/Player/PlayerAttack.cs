@@ -7,6 +7,7 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private Image staminaFill;
     [SerializeField] private InputManager inputManager;
     [SerializeField] private AttackSequenceData[] attackSequences;
+    [SerializeField] private AudioSource attackSound;
 
     [Header("Stamina Settings")]
     [SerializeField] private float maxStamina = 1f;
@@ -108,6 +109,7 @@ public class PlayerAttack : MonoBehaviour
         // 2. Play the animation (if you have an animator)
         if (_animator)
         {
+            attackSound.PlayOneShot(attackSound.clip);
             switch (currentAttackData.attackType)
             {
                 case AttackType.Attack1:
