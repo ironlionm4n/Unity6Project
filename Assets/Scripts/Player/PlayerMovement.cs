@@ -1,16 +1,18 @@
 using System;
+using System.Collections;
 using Player;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Movement Speeds")] [SerializeField]
+    [Header("Movement Speed")] [SerializeField]
     private float defaultMoveSpeed = 5f;
-
     [SerializeField] private float slowdownSpeed = 2f; // Speed when slowed by attack
     [SerializeField] private float slowdownDuration = 0.4f;
     [SerializeField] private float speedRecoverRate = 5f; // How quickly we go back to full speed
     [SerializeField] private InputManager inputManager;
+    [SerializeField] private float sweepAttackForce;
+    [SerializeField] private float sweepAttackAnimationOffsetTime;
 
     private Rigidbody2D _rb;
     private SpriteRenderer _spriteRenderer;
@@ -22,31 +24,72 @@ public class PlayerMovement : MonoBehaviour
     private float _slowdownTimer; // Tracks how long we've been slowed
     private bool _isSlowed;
     private PlayerHealth _playerHealth;
+    private bool _canMove;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _playerHealth = GetComponent<PlayerHealth>();
+        _currentMoveSpeed = defaultMoveSpeed;
+        _canMove = true;
+        _isSlowed = false;
     }
 
     private void OnEnable()
     {
         // Subscribe to the OnAttackPressed event
         inputManager.OnAttackPressed += HandleAttack;
+        inputManager.OnSweepAttackPerformed += HandleSweepAttack;
+        inputManager.OnSweepAttackStarted += HandleSweepAttackStarted;
+        inputManager.OnSweepAttackCanceled += HandleSweepAttackCanceled;
     }
-
     private void OnDisable()
     {
         // Unsubscribe from the OnAttackPressed event
         inputManager.OnAttackPressed -= HandleAttack;
+        inputManager.OnSweepAttackPerformed -= HandleSweepAttack;
+        inputManager.OnSweepAttackStarted -= HandleSweepAttackStarted;
+        inputManager.OnSweepAttackCanceled -= HandleSweepAttackCanceled;
     }
+
+    private void HandleSweepAttackCanceled()
+    {
+        _isSlowed = false;
+    }
+
+    private void HandleSweepAttackStarted()
+    {
+        if(_playerHealth.RecoveringFromHit) return;
+        
+        StartSlowedSpeed();
+    }
+
+    private void HandleSweepAttack()
+    {
+        StartCoroutine(SweepAttackRoutine());
+    }
+
+    private IEnumerator SweepAttackRoutine()
+    {
+        _canMove = false;
+        _rb.AddForce(Vector2.right * ((_facingDirection == FacingDirection.Right ? 1 : -1) * sweepAttackForce), ForceMode2D.Impulse);
+        yield return new WaitForSeconds(sweepAttackAnimationOffsetTime);
+        _canMove = true;
+        _isSlowed = false;
+    }
+
 
     private void HandleAttack()
     {
+        StartSlowedSpeed();
+        _slowdownTimer = 0f;
+    }
+
+    private void StartSlowedSpeed()
+    {
         _currentMoveSpeed = slowdownSpeed;
         _isSlowed = true;
-        _slowdownTimer = 0f;
     }
 
     private void Update()
@@ -57,7 +100,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(_playerHealth.RecoveringFromHit) return;
+        if(_playerHealth.RecoveringFromHit || !_canMove) return;
         
         var movementInput = inputManager.MovementInput;
         _rb.linearVelocity = new Vector2(movementInput.x * _currentMoveSpeed, _rb.linearVelocity.y);

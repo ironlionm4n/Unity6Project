@@ -10,19 +10,14 @@ namespace Enemies.Stategies
         private float _idleTimer;
         private bool _isWalking;
         private float _moveDirection; // -1 for left, 1 for right
-        private readonly float _raycastDistance = 2f;
         private int _walkCount;
         private float _walkCountTimer;
         private float _walkCountDuration = 2f;
+        private readonly float _wallRayLength;
 
         public BasicPatrolStrategy(float wallRayLength)
         {
-            _raycastDistance = wallRayLength;
-        }
-
-        public BasicPatrolStrategy()
-        {
-            
+            _wallRayLength = wallRayLength;
         }
 
         public void Execute(Enemy enemy)
@@ -41,12 +36,11 @@ namespace Enemies.Stategies
                     }
                 }
                 _walkTimer += Time.deltaTime;
-                Move(enemy, _moveDirection);
-
-                if (HitWall(enemy.transform.position, _moveDirection, enemy))
+                if (HitWall(enemy))
                 {
                     SwitchDirections(enemy);
                 }
+                Move(enemy, _moveDirection);
                 
                 if (_walkTimer >= _walkDuration)
                 {
@@ -76,11 +70,11 @@ namespace Enemies.Stategies
             enemy.transform.localScale = new Vector3(_moveDirection, 1, 1);
         }
 
-        private bool HitWall(Vector3 transformPosition, float moveDirection, Enemy enemy)
+        private bool HitWall(Enemy enemy)
         {
-            Vector2 raycastOrigin = new Vector2(transformPosition.x, transformPosition.y);
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, Vector2.right * moveDirection, _raycastDistance, enemy.ObstacleLayer);
-            Debug.DrawRay( raycastOrigin, Vector2.right * (moveDirection * _raycastDistance), Color.red);
+            var origin = enemy.transform.position;
+            RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.right * _moveDirection, _wallRayLength, enemy.ObstacleLayer);
+            Debug.DrawRay( origin, Vector2.right * (_moveDirection * _wallRayLength), Color.red);
             return hit.collider != null;
         }
 

@@ -45,7 +45,7 @@ namespace Enemies.Stategies
 
         private void StopSpawning(Enemy enemy)
         {
-            enemy.ChangeStrategy(new BasicPatrolStrategy());
+            enemy.ChangeStrategy(new BasicPatrolStrategy(enemy.wallRayLength));
         }
 
         public void OnExit(Enemy enemy)

@@ -13,6 +13,7 @@ public class PlayerAnimation : MonoBehaviour
     public static readonly int SweepAttack = Animator.StringToHash("SweepAttack");
     private static readonly int Jump = Animator.StringToHash("Jump");
     private static readonly int IsJumping = Animator.StringToHash("IsJumping");
+    private static readonly int SweepCharging = Animator.StringToHash("SweepCharging");
 
 
     private void Awake()
@@ -55,5 +56,10 @@ public class PlayerAnimation : MonoBehaviour
     public void SetAttackTrigger(int attackTrigger)
     {
         _animator.SetTrigger(attackTrigger);
+    }
+
+    public void SetSweepCharging(bool b)
+    {
+        _animator.SetBool(SweepCharging, b);
     }
 }

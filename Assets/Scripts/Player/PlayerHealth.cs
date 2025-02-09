@@ -12,12 +12,12 @@ namespace Player
         [SerializeField] private float hurtDuration;
         [SerializeField] private AudioSource hurtSound;
         [SerializeField] private Image healthFill;
+        [SerializeField] private float fillSpeed;
         
         private SpriteRenderer _spriteRenderer;
         private Rigidbody2D _rigidbody2D;
         private float _currentHealth;
         private float _targetFill;
-        [SerializeField] private float fillSpeed;
         public bool RecoveringFromHit { get; set; }
 
         private void Awake()
@@ -29,6 +29,7 @@ namespace Player
         private void Start()
         {
             _currentHealth = health;
+            _targetFill = _currentHealth;
         }
 
         private void Update()
@@ -41,8 +42,6 @@ namespace Player
             FlashHurtColor();
             _currentHealth -= damage;
             CalculateRatioOfHealth();
-            Debug.Log($"Player health: {_currentHealth}");
-            Debug.Log($"Horiz Component: {horizontalComponent}");
             if (_currentHealth <= 0)
             {
                 Die();

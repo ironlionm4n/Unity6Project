@@ -6,11 +6,12 @@ using UnityEngine.Serialization;
 
 public class Enemy : MonoBehaviour
 {
+    public float wallRayLength;
+    
     [SerializeField] private LayerMask obstacleLayer;
     [SerializeField] private float invulnerabilityTime = 0.75f;
     [SerializeField] private float health = 100f;
     [SerializeField] private Transform visualCenter;
-    [SerializeField] private float wallRayLength;
     
     private Animator _animator;
     private static readonly int Damage = Animator.StringToHash("Damage");

@@ -9,6 +9,9 @@ public class InputManager : MonoBehaviour
 
     public Action OnAttackPressed;
     public Action OnJumpPressed;
+    public Action OnSweepAttackPerformed;
+    public Action OnSweepAttackStarted;
+    public Action OnSweepAttackCanceled;
 
     private void Awake()
     {
@@ -24,6 +27,24 @@ public class InputManager : MonoBehaviour
         inputActions.Player.Move.canceled += MoveOnCanceled();
         inputActions.Player.Attack.performed += AttackOnPerformed();
         inputActions.Player.Jump.performed += JumpOnPerformed();
+        inputActions.Player.SweepAttack.started += SweepAttackOnStarted();
+        inputActions.Player.SweepAttack.performed += SweepAttackOnPerformed();
+        inputActions.Player.SweepAttack.canceled += SweepAttackOnCanceled();
+    }
+
+    private Action<InputAction.CallbackContext> SweepAttackOnCanceled()
+    {
+        return _ => OnSweepAttackCanceled?.Invoke();
+    }
+
+    private Action<InputAction.CallbackContext> SweepAttackOnStarted()
+    {
+        return _ => OnSweepAttackStarted?.Invoke();
+    }
+
+    private Action<InputAction.CallbackContext> SweepAttackOnPerformed()
+    {
+        return _ => OnSweepAttackPerformed?.Invoke();
     }
 
     private Action<InputAction.CallbackContext> JumpOnPerformed()
@@ -53,7 +74,9 @@ public class InputManager : MonoBehaviour
         inputActions.Player.Move.canceled -= MoveOnCanceled();
         inputActions.Player.Attack.performed -= AttackOnPerformed();
         inputActions.Player.Jump.performed -= JumpOnPerformed();
-        
+        inputActions.Player.SweepAttack.performed -= SweepAttackOnPerformed();
+        inputActions.Player.SweepAttack.started -= SweepAttackOnStarted();
+        inputActions.Player.SweepAttack.canceled -= SweepAttackOnCanceled();
         inputActions.Player.Disable();
     }
 }

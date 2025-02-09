@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PlayerAttack : MonoBehaviour
@@ -8,6 +10,8 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private InputManager inputManager;
     [SerializeField] private AttackSequenceData[] attackSequences;
     [SerializeField] private AudioSource attackSound;
+    [SerializeField] private AudioSource sweepAttackSound;
+    [SerializeField] private AudioSource sweepAttackChargeSound;
 
     [Header("Stamina Settings")]
     [SerializeField] private float maxStamina = 1f;
@@ -17,6 +21,7 @@ public class PlayerAttack : MonoBehaviour
     [Header("Attack Combo Settings")]
     [SerializeField] private float attackSequenceDelay = 0.5f;
     [SerializeField] private Collider2D damageCollider;
+    [SerializeField] private float missingStaminaModifier;
 
     // Internal stamina tracking
     private float _stamina;
@@ -39,8 +44,47 @@ public class PlayerAttack : MonoBehaviour
 
         // Subscribe to your InputManager's event
         inputManager.OnAttackPressed += HandleAttack;
+        inputManager.OnSweepAttackStarted += HandleSweepAttackStarted;
+        inputManager.OnSweepAttackPerformed += HandleSweepAttack;
+        inputManager.OnSweepAttackCanceled += HandleSweepAttackCanceled;
         _animator = GetComponentInChildren<PlayerAnimation>();
         damageCollider.enabled = false;
+    }
+
+    private void HandleSweepAttackStarted()
+    {
+        if(_isAttacking || _stamina < 0.25f) return;
+        
+        _animator.SetSweepCharging(true);
+        sweepAttackChargeSound.PlayOneShot(sweepAttackChargeSound.clip);
+    }
+
+    private void OnDisable()
+    {
+        // Unsubscribe from your InputManager's event
+        inputManager.OnAttackPressed -= HandleAttack;
+        inputManager.OnSweepAttackStarted -= HandleSweepAttackStarted;
+        inputManager.OnSweepAttackPerformed -= HandleSweepAttack;
+        inputManager.OnSweepAttackCanceled -= HandleSweepAttackCanceled;
+    }
+
+    private void HandleSweepAttackCanceled()
+    {
+        _animator.SetSweepCharging(false);
+    }
+
+    private void HandleSweepAttack()
+    {
+        if (_stamina < 0.25f)
+            return;
+        sweepAttackSound.PlayOneShot(sweepAttackSound.clip);
+        _animator.SetSweepCharging(false);
+        _animator.SetAttackTrigger(PlayerAnimation.SweepAttack);
+        _stamina -= 0.25f;
+        staminaFill.fillAmount = GetRatioOfMaxStamina();
+        _staminaRefillTimer = 0f;
+        EnableDamageCollider();
+        StartCoroutine(DisableDamageColliderRoutine(0.66f));
     }
 
     private void Update()
@@ -58,8 +102,10 @@ public class PlayerAttack : MonoBehaviour
             // After the delay, slowly move stamina back to full
             if (_staminaRefillTimer >= staminaRefillDelay)
             {
-                _stamina = Mathf.MoveTowards(_stamina, maxStamina, 
-                                             staminaRefillRate * Time.deltaTime);
+                float missingStamina = maxStamina - _stamina;
+                float dynamicRefillRate = staminaRefillRate * Mathf.Log10(missingStamina + 1) * missingStaminaModifier;
+                _stamina = Mathf.MoveTowards(_stamina, maxStamina, dynamicRefillRate * Time.deltaTime);
+                
                 staminaFill.fillAmount = _stamina / maxStamina;
             }
         }
@@ -105,6 +151,7 @@ public class PlayerAttack : MonoBehaviour
         staminaFill.fillAmount = GetRatioOfMaxStamina();
         _staminaRefillTimer = 0f; // reset refill timer since we just attacked
         _currentAttackDamage = currentAttackData.damage;
+        _animator.SetSweepCharging(false);
 
         // 2. Play the animation (if you have an animator)
         if (_animator)
@@ -144,10 +191,15 @@ public class PlayerAttack : MonoBehaviour
         return _stamina / maxStamina;
     }
 
-    private IEnumerator DisableDamageColliderRoutine()
+    /// <summary>
+    /// Default delay is 0.215f, which is the duration of the basic attack combos
+    /// </summary>
+    /// <param name="delay"></param>
+    /// <returns></returns>
+    private IEnumerator DisableDamageColliderRoutine(float delay = 0.215f)
     {
         _isAttacking = true;
-        yield return new WaitForSeconds(0.215f);
+        yield return new WaitForSeconds(delay);
         _isAttacking = false;
         DisableDamageCollider();
     }

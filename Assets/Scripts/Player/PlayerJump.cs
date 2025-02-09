@@ -13,10 +13,12 @@ public class PlayerJump : MonoBehaviour
     private bool _isJumping;
     private Rigidbody2D _rb;
     private float _downForce = 0f;
+    private GroundCheck _groundCheck;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _groundCheck = GetComponentInChildren<GroundCheck>();
     }
 
     private void OnEnable()
@@ -26,15 +28,6 @@ public class PlayerJump : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // if (_rb.linearVelocity.y < 0)  // Player is falling
-        // {
-        //     _rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (fallMultiplier - 1) * Time.fixedDeltaTime);
-        // }
-        // else if (_rb.linearVelocity.y > 0 && !_isJumping)  // Player is ascending but jump button is released
-        // {
-        //     _rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.fixedDeltaTime);
-        // }
-
         if (_isJumping)
         {
             _downForce = Mathf.MoveTowards(_downForce, maxDownForce, downForceIncreaseRate * Time.fixedDeltaTime);
@@ -48,7 +41,7 @@ public class PlayerJump : MonoBehaviour
 
     private void HandleJump()
     {
-        if (!_isJumping)
+        if (!_isJumping && _groundCheck.IsGrounded)
         {
             Jump();
         }
