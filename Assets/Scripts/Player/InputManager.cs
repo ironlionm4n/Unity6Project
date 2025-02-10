@@ -32,6 +32,11 @@ public class InputManager : MonoBehaviour
         inputActions.Player.SweepAttack.canceled += SweepAttackOnCanceled();
     }
 
+    private void Update()
+    {
+        
+    }
+
     private Action<InputAction.CallbackContext> SweepAttackOnCanceled()
     {
         return _ => OnSweepAttackCanceled?.Invoke();
