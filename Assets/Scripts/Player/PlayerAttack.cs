@@ -153,7 +153,7 @@ public class PlayerAttack : MonoBehaviour
         _currentAttackDamage = currentAttackData.damage;
         _animator.SetSweepCharging(false);
 
-        // 2. Play the animation (if you have an animator)
+        // 2. Play the animation
         if (_animator)
         {
             attackSound.PlayOneShot(attackSound.clip);
@@ -172,9 +172,6 @@ public class PlayerAttack : MonoBehaviour
                     _animator.SetAttackTrigger(PlayerAnimation.CrossSlice);
                     EnableDamageCollider();
                     break;
-                // case AttackType.SweepAttack:
-                //     _animator.SetAttackTrigger(PlayerAnimation.SweepAttack);
-                //     break;
             }
         }
 
@@ -224,5 +221,4 @@ public enum AttackType
     Attack1,
     Attack2,
     CrossSlice,
-    SweepAttack,
 }

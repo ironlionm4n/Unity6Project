@@ -36,6 +36,7 @@ public class ProjectileBehavior : MonoBehaviour
         yield return new WaitForSeconds(lifeTime);
         _spriteRenderer.enabled = false;
         _collider2D.enabled = false;
+        // Look at making a streamline way to pool anything
         ParticleSystemManager.Instance.SpawnSpiderBombParticle(transform.position);
         Spawner.ReturnProjectile(gameObject);
     }

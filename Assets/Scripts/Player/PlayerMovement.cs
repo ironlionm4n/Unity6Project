@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private InputManager inputManager;
     [SerializeField] private float sweepAttackForce;
     [SerializeField] private float sweepAttackAnimationOffsetTime;
+    [SerializeField] private float sweepAttackSlowSpeed;
 
     private Rigidbody2D _rb;
     private SpriteRenderer _spriteRenderer;
@@ -62,7 +63,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if(_playerHealth.RecoveringFromHit) return;
         
-        StartSlowedSpeed();
+        StartSlowedSpeed(true);
     }
 
     private void HandleSweepAttack()
@@ -86,9 +87,9 @@ public class PlayerMovement : MonoBehaviour
         _slowdownTimer = 0f;
     }
 
-    private void StartSlowedSpeed()
+    private void StartSlowedSpeed(bool isSweepAttack = false)
     {
-        _currentMoveSpeed = slowdownSpeed;
+        _currentMoveSpeed = isSweepAttack ? sweepAttackSlowSpeed : slowdownSpeed;
         _isSlowed = true;
     }
 

@@ -10,6 +10,7 @@ public class PlayerJump : MonoBehaviour
     [SerializeField] private float downForceIncreaseRate = 2f;
     [SerializeField] private float maxDownForce = 10f;
     [SerializeField] private AudioSource jumpSound;
+    [SerializeField] private float maxJumpVelocity = 10f;
     private bool _isJumping;
     private Rigidbody2D _rb;
     private float _downForce = 0f;
@@ -32,6 +33,7 @@ public class PlayerJump : MonoBehaviour
         {
             _downForce = Mathf.MoveTowards(_downForce, maxDownForce, downForceIncreaseRate * Time.fixedDeltaTime);
             _rb.AddForce(Vector2.down * _downForce, ForceMode2D.Force);
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Clamp(_rb.linearVelocity.y, -maxJumpVelocity, maxJumpVelocity));
         }
         else
         {

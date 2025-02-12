@@ -15,13 +15,23 @@ namespace Enemies.Spider
         private float _spawnTimer;
         private float _spawnDurationTimer;
         private bool _isSpawning;
+        private GameObject newParent;
         
         private void Start()
         {
             _spawnTimer = 0f;
             _spawnDurationTimer = 0f;
             _projectilePool =
-                new ObjectPool<GameObject>(() => Instantiate(projectilePrefab), HandleOnGet, HandleOnRelease);
+                new ObjectPool<GameObject>(HandleOnCreate, HandleOnGet, HandleOnRelease);
+            newParent = new GameObject("Projectiles");
+        }
+
+        private GameObject HandleOnCreate()
+        {
+            var projectile = Instantiate(projectilePrefab, newParent.transform);
+            projectile.transform.position = Vector3.zero;
+            projectile.SetActive(false);
+            return projectile;
         }
 
         private void HandleOnRelease(GameObject obj)
