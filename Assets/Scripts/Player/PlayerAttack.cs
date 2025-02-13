@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -12,6 +13,8 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private AudioSource attackSound;
     [SerializeField] private AudioSource sweepAttackSound;
     [SerializeField] private AudioSource sweepAttackChargeSound;
+    [Header("Light Intensity"), SerializeField] private float lowLightValue = 1f;
+    [SerializeField] private float highLightValue = 5f;
 
     [Header("Stamina Settings")]
     [SerializeField] private float maxStamina = 1f;
@@ -30,9 +33,10 @@ public class PlayerAttack : MonoBehaviour
     // Internal combo tracking
     private int _attackSequenceIndex;     // Points to next attack in the combo
     private float _attackSequenceTimer;   // Tracks time since last attack
-
-    // Example: reference to Animator if you have one
+    
     private PlayerAnimation _animator;
+    private Light2D _playerLight;
+    private SpriteRenderer _playerSpriteRenderer;
     private static float _currentAttackDamage;
     private bool _isAttacking;
     public static float CurrentAttackDamage => _currentAttackDamage;
@@ -49,6 +53,8 @@ public class PlayerAttack : MonoBehaviour
         inputManager.OnSweepAttackCanceled += HandleSweepAttackCanceled;
         _animator = GetComponentInChildren<PlayerAnimation>();
         damageCollider.enabled = false;
+        _playerLight = GetComponentInChildren<Light2D>();
+        _playerSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     private void HandleSweepAttackStarted()
@@ -91,6 +97,7 @@ public class PlayerAttack : MonoBehaviour
     {
         HandleStamina();
         HandleAttackSequenceReset();
+        SetLightIntensity();
     }
 
     private void HandleStamina()
@@ -181,6 +188,12 @@ public class PlayerAttack : MonoBehaviour
         _attackSequenceIndex++;
         // reset timer to give the player a "window" to do the next attack
         _attackSequenceTimer = 0f;
+    }
+
+    private void SetLightIntensity()
+    {
+        // want the light inentisty to range from 1 to 5 depending on ratio
+        _playerLight.intensity = lowLightValue + highLightValue * GetRatioOfMaxStamina();
     }
 
     public float GetRatioOfMaxStamina()

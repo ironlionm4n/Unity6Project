@@ -120020,7 +120020,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 938bc2888b78d12448097bf898202568, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -120086,7 +120086,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b37952babcf70a949ad9d9779f2e3ccc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  emptyStaminaColor: {r: 1, g: 1, b: 1, a: 1}
+  emptyStaminaColor: {r: 0.9450981, g: 0.98823535, b: 0.09019608, a: 0.9490196}
   fullStaminaColor: {r: 0.7960785, g: 1, b: 0.3647059, a: 1}
 --- !u!1 &1270447624
 GameObject:
@@ -123822,7 +123822,7 @@ MonoBehaviour:
   inputManager: {fileID: 1315006216}
   sweepAttackForce: 13
   sweepAttackAnimationOffsetTime: 0.33
-  sweepAttackSlowSpeed: 0
+  sweepAttackSlowSpeed: 0.5
 --- !u!114 &1403640861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123875,6 +123875,8 @@ MonoBehaviour:
   attackSound: {fileID: 1025139551}
   sweepAttackSound: {fileID: 1025139553}
   sweepAttackChargeSound: {fileID: 1025139554}
+  lowLightValue: 0.5
+  highLightValue: 5
   maxStamina: 1
   staminaRefillDelay: 1
   staminaRefillRate: 1
@@ -124071,8 +124073,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1535517662}
   - component: {fileID: 1535517663}
-  - component: {fileID: 1535517664}
   - component: {fileID: 1535517665}
+  - component: {fileID: 1535517666}
   m_Layer: 8
   m_Name: Spider
   m_TagString: Untagged
@@ -124124,52 +124126,6 @@ Rigidbody2D:
   m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!61 &1535517664
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1535517659}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 128
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0.9, y: -1.515}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1.5, y: 1}
-  m_EdgeRadius: 0
 --- !u!114 &1535517665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124189,6 +124145,43 @@ MonoBehaviour:
   invulnerabilityTime: 0.5
   health: 200
   visualCenter: {fileID: 621691445}
+--- !u!70 &1535517666
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1535517659}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 1024
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.8, y: -1.5}
+  m_Size: {x: 0.5, y: 1}
+  m_Direction: 1
 --- !u!1 &1567850789
 GameObject:
   m_ObjectHideFlags: 0
@@ -124477,7 +124470,7 @@ MonoBehaviour:
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.66
   m_Color: {r: 0.621036, g: 1, b: 0.09019607, a: 1}
-  m_Intensity: 5
+  m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
   m_ApplyToSortingLayers: bbc550284f66363c00000000e99ff9a3ab378df2
