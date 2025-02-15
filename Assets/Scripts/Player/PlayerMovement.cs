@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using Player;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -15,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float sweepAttackForce;
     [SerializeField] private float sweepAttackAnimationOffsetTime;
     [SerializeField] private float sweepAttackSlowSpeed;
+    [SerializeField] private float landSlowedSpeed;
 
     private Rigidbody2D _rb;
     private SpriteRenderer _spriteRenderer;
@@ -46,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
         inputManager.OnSweepAttackStarted += HandleSweepAttackStarted;
         inputManager.OnSweepAttackCanceled += HandleSweepAttackCanceled;
     }
+    
     private void OnDisable()
     {
         // Unsubscribe from the OnAttackPressed event
@@ -91,6 +91,12 @@ public class PlayerMovement : MonoBehaviour
     private void StartSlowedSpeed(bool isSweepAttack = false)
     {
         _currentMoveSpeed = isSweepAttack ? sweepAttackSlowSpeed : slowdownSpeed;
+        _isSlowed = true;
+    }
+
+    public void LandSlowedSpeed()
+    {
+        _currentMoveSpeed = landSlowedSpeed;
         _isSlowed = true;
     }
 

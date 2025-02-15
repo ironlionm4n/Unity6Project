@@ -39,6 +39,7 @@ public class PlayerAnimation : MonoBehaviour
     private void OnLand()
     {
         _animator.SetBool(IsJumping, false);
+        _animator.SetTrigger("Land");
     }
 
     private void OnJumpPressed()
@@ -61,5 +62,10 @@ public class PlayerAnimation : MonoBehaviour
     public void SetSweepCharging(bool b)
     {
         _animator.SetBool(SweepCharging, b);
+    }
+
+    public void JustLanded()
+    {
+        _animator.SetBool(IsJumping, false);
     }
 }

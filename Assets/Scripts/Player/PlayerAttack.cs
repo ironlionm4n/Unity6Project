@@ -81,7 +81,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void HandleSweepAttack()
     {
-        if (_stamina < 0.25f)
+        if (_stamina < 0.25f || _isAttacking)
             return;
         sweepAttackSound.PlayOneShot(sweepAttackSound.clip);
         _animator.SetSweepCharging(false);
@@ -159,6 +159,7 @@ public class PlayerAttack : MonoBehaviour
         _staminaRefillTimer = 0f; // reset refill timer since we just attacked
         _currentAttackDamage = currentAttackData.damage;
         _animator.SetSweepCharging(false);
+        _isAttacking = true;
 
         // 2. Play the animation
         if (_animator)
@@ -208,7 +209,7 @@ public class PlayerAttack : MonoBehaviour
     /// <returns></returns>
     private IEnumerator DisableDamageColliderRoutine(float delay = 0.215f)
     {
-        _isAttacking = true;
+
         yield return new WaitForSeconds(delay);
         _isAttacking = false;
         DisableDamageCollider();
