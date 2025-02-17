@@ -1,4 +1,5 @@
 ﻿using System;
+using Camera;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,15 +14,21 @@ namespace Player
         [SerializeField] private AudioSource hurtSound;
         [SerializeField] private Image healthFill;
         [SerializeField] private float fillSpeed;
+        [SerializeField]
+        private CinemachineManager cinemachineManager;
         
+        private PlayerAnimation _playerAnimation;
         private SpriteRenderer _spriteRenderer;
         private Rigidbody2D _rigidbody2D;
         private float _currentHealth;
         private float _targetFill;
+        private bool _isDead;
+        public bool IsDead => _isDead;
         public bool RecoveringFromHit { get; set; }
 
         private void Awake()
         {
+            _playerAnimation = GetComponent<PlayerAnimation>();
             _rigidbody2D = GetComponent<Rigidbody2D>();
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         }
@@ -42,7 +49,7 @@ namespace Player
             FlashHurtColor();
             _currentHealth -= damage;
             CalculateRatioOfHealth();
-            if (_currentHealth <= 0)
+            if (_currentHealth <= 0 && !_isDead)
             {
                 Die();
             }
@@ -68,7 +75,9 @@ namespace Player
 
         private void Die()
         {
-            Debug.Log("Player died");
+            _isDead = true;
+            _playerAnimation.SetDeathTrigger();
+            cinemachineManager.MakePlayerDeathCinemachinePriority();
         }
         
         private void CalculateRatioOfHealth()

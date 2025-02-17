@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Player;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
@@ -7,6 +8,10 @@ using UnityEngine.UI;
 
 public class PlayerAttack : MonoBehaviour
 {
+    public event Action OnSweepAttackStarted;
+    public event Action OnSweepAttackPerformed;
+    public Action OnSweepAttackCanceled;
+    
     [SerializeField] private Image staminaFill;
     [SerializeField] private InputManager inputManager;
     [SerializeField] private AttackSequenceData[] attackSequences;
@@ -34,11 +39,13 @@ public class PlayerAttack : MonoBehaviour
     private int _attackSequenceIndex;     // Points to next attack in the combo
     private float _attackSequenceTimer;   // Tracks time since last attack
     
-    private PlayerAnimation _animator;
+    private PlayerAnimation _playerAnimation;
+    private PlayerHealth _playerHealth;
     private Light2D _playerLight;
     private SpriteRenderer _playerSpriteRenderer;
     private static float _currentAttackDamage;
     private bool _isAttacking;
+    private bool _sweepAttackStarted;
     public static float CurrentAttackDamage => _currentAttackDamage;
 
     private void Start()
@@ -51,7 +58,8 @@ public class PlayerAttack : MonoBehaviour
         inputManager.OnSweepAttackStarted += HandleSweepAttackStarted;
         inputManager.OnSweepAttackPerformed += HandleSweepAttack;
         inputManager.OnSweepAttackCanceled += HandleSweepAttackCanceled;
-        _animator = GetComponentInChildren<PlayerAnimation>();
+        _playerAnimation = GetComponent<PlayerAnimation>();
+        _playerHealth = GetComponent<PlayerHealth>();
         damageCollider.enabled = false;
         _playerLight = GetComponentInChildren<Light2D>();
         _playerSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -59,9 +67,11 @@ public class PlayerAttack : MonoBehaviour
 
     private void HandleSweepAttackStarted()
     {
-        if(_isAttacking || _stamina < 0.25f) return;
+        if(_isAttacking || _stamina < 0.25f || CheckAnimatorStatesForBasicAttacks()) return;
         
-        _animator.SetSweepCharging(true);
+        _sweepAttackStarted = true;
+        _playerAnimation.SetSweepCharging(true);
+        OnSweepAttackStarted?.Invoke();
         sweepAttackChargeSound.PlayOneShot(sweepAttackChargeSound.clip);
     }
 
@@ -76,16 +86,21 @@ public class PlayerAttack : MonoBehaviour
 
     private void HandleSweepAttackCanceled()
     {
-        _animator.SetSweepCharging(false);
+        _sweepAttackStarted = false;
+        OnSweepAttackCanceled?.Invoke();
+        _playerAnimation.SetSweepCharging(false);
     }
 
     private void HandleSweepAttack()
     {
-        if (_stamina < 0.25f || _isAttacking)
+        if (_stamina < 0.25f || CheckAnimatorStatesForBasicAttacks() || !_sweepAttackStarted)
             return;
+        
         sweepAttackSound.PlayOneShot(sweepAttackSound.clip);
-        _animator.SetSweepCharging(false);
-        _animator.SetAttackTrigger(PlayerAnimation.SweepAttack);
+        _sweepAttackStarted = false;
+        OnSweepAttackPerformed?.Invoke();
+        _playerAnimation.SetSweepCharging(false);
+        _playerAnimation.SetAttackTrigger(PlayerAnimation.SweepAttack);
         _stamina -= 0.25f;
         staminaFill.fillAmount = GetRatioOfMaxStamina();
         _staminaRefillTimer = 0f;
@@ -93,8 +108,15 @@ public class PlayerAttack : MonoBehaviour
         StartCoroutine(DisableDamageColliderRoutine(0.66f));
     }
 
+    public bool CheckAnimatorStatesForBasicAttacks()
+    {
+        return _playerAnimation.IsPlaying(PlayerAnimation.Attack1) || _playerAnimation.IsPlaying(PlayerAnimation.Attack2) || _playerAnimation.IsPlaying(PlayerAnimation.CrossSlice);
+    }
+
     private void Update()
     {
+        if(_playerHealth.IsDead) return;
+        
         HandleStamina();
         HandleAttackSequenceReset();
         SetLightIntensity();
@@ -158,26 +180,25 @@ public class PlayerAttack : MonoBehaviour
         staminaFill.fillAmount = GetRatioOfMaxStamina();
         _staminaRefillTimer = 0f; // reset refill timer since we just attacked
         _currentAttackDamage = currentAttackData.damage;
-        _animator.SetSweepCharging(false);
         _isAttacking = true;
 
         // 2. Play the animation
-        if (_animator)
+        if (_playerAnimation)
         {
             attackSound.PlayOneShot(attackSound.clip);
             switch (currentAttackData.attackType)
             {
                 case AttackType.Attack1:
-                    _animator.SetAttackTrigger(PlayerAnimation.Attack1);
+                    _playerAnimation.SetAttackTrigger(PlayerAnimation.Attack1);
                     EnableDamageCollider();
                     break;
                 case AttackType.Attack2:
-                    _animator.SetAttackTrigger(PlayerAnimation.Attack2);
+                    _playerAnimation.SetAttackTrigger(PlayerAnimation.Attack2);
                     EnableDamageCollider();
                     break;
                 // If you add cross slice or sweep in the array, handle them here
                 case AttackType.CrossSlice:
-                    _animator.SetAttackTrigger(PlayerAnimation.CrossSlice);
+                    _playerAnimation.SetAttackTrigger(PlayerAnimation.CrossSlice);
                     EnableDamageCollider();
                     break;
             }
@@ -228,6 +249,8 @@ public class PlayerAttack : MonoBehaviour
     {
         damageCollider.enabled = false;
     }
+
+
 }
 
 public enum AttackType

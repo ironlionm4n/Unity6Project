@@ -26,12 +26,14 @@ public class PlayerMovement : MonoBehaviour
     private bool _isSlowed;
     private PlayerHealth _playerHealth;
     private bool _canMove;
+    private PlayerAttack _playerAttack;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _playerHealth = GetComponent<PlayerHealth>();
+        _playerAttack = GetComponent<PlayerAttack>();
         _currentMoveSpeed = defaultMoveSpeed;
         _canMove = true;
         _isSlowed = false;
@@ -41,18 +43,18 @@ public class PlayerMovement : MonoBehaviour
     {
         // Subscribe to the OnAttackPressed event
         inputManager.OnAttackPressed += HandleAttack;
-        inputManager.OnSweepAttackPerformed += HandleSweepAttack;
-        inputManager.OnSweepAttackStarted += HandleSweepAttackStarted;
-        inputManager.OnSweepAttackCanceled += HandleSweepAttackCanceled;
+        _playerAttack.OnSweepAttackPerformed += HandleSweepAttack;
+        _playerAttack.OnSweepAttackStarted += HandleSweepAttackStarted;
+        _playerAttack.OnSweepAttackCanceled += HandleSweepAttackCanceled;
     }
     
     private void OnDisable()
     {
         // Unsubscribe from the OnAttackPressed event
         inputManager.OnAttackPressed -= HandleAttack;
-        inputManager.OnSweepAttackPerformed -= HandleSweepAttack;
-        inputManager.OnSweepAttackStarted -= HandleSweepAttackStarted;
-        inputManager.OnSweepAttackCanceled -= HandleSweepAttackCanceled;
+        _playerAttack.OnSweepAttackPerformed -= HandleSweepAttack;
+        _playerAttack.OnSweepAttackStarted -= HandleSweepAttackStarted;
+        _playerAttack.OnSweepAttackCanceled -= HandleSweepAttackCanceled;
     }
 
     private void HandleSweepAttackCanceled()
@@ -102,12 +104,19 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if(_playerHealth.IsDead) return;
+        
         HandleSpeedRecovery();
         HandleSpriteXFlip();
     }
 
     private void FixedUpdate()
     {
+        if (_playerHealth.IsDead)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            return;
+        }
         if(_playerHealth.RecoveringFromHit || !_canMove) return;
         
         var movementInput = inputManager.MovementInput;

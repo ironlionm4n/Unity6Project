@@ -14,6 +14,8 @@ public class PlayerAnimation : MonoBehaviour
     private static readonly int Jump = Animator.StringToHash("Jump");
     private static readonly int IsJumping = Animator.StringToHash("IsJumping");
     private static readonly int SweepCharging = Animator.StringToHash("SweepCharging");
+    private static readonly int Death = Animator.StringToHash("Death");
+    private static readonly int Land = Animator.StringToHash("Land");
 
 
     private void Awake()
@@ -39,7 +41,7 @@ public class PlayerAnimation : MonoBehaviour
     private void OnLand()
     {
         _animator.SetBool(IsJumping, false);
-        _animator.SetTrigger("Land");
+        _animator.SetTrigger(Land);
     }
 
     private void OnJumpPressed()
@@ -67,5 +69,20 @@ public class PlayerAnimation : MonoBehaviour
     public void JustLanded()
     {
         _animator.SetBool(IsJumping, false);
+    }
+
+    public bool IsPlaying(int hash)
+    {
+        return _animator.GetCurrentAnimatorStateInfo(0).shortNameHash == hash;
+    }
+
+    public void SetDeathTrigger()
+    {
+        _animator.SetTrigger(Death);
+    }
+
+    public bool CheckBool(int sweepCharging)
+    {
+        return _animator.GetBool(sweepCharging);
     }
 }
