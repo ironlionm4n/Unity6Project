@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Camera;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,6 +17,8 @@ namespace Player
         [SerializeField] private float fillSpeed;
         [SerializeField]
         private CinemachineManager cinemachineManager;
+        [SerializeField] private GameObject gameOver;
+        [SerializeField] InputManager inputManager;
         
         private PlayerAnimation _playerAnimation;
         private SpriteRenderer _spriteRenderer;
@@ -23,6 +26,9 @@ namespace Player
         private float _currentHealth;
         private float _targetFill;
         private bool _isDead;
+        private SpriteMask _deathMask;
+        private Collider2D _collider;
+        private ParticleSystem _deathParticles;
         public bool IsDead => _isDead;
         public bool RecoveringFromHit { get; set; }
 
@@ -31,6 +37,10 @@ namespace Player
             _playerAnimation = GetComponent<PlayerAnimation>();
             _rigidbody2D = GetComponent<Rigidbody2D>();
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            _deathMask = GetComponentInChildren<SpriteMask>();
+            _deathParticles = GetComponentInChildren<ParticleSystem>();
+            _collider = GetComponent<Collider2D>();
+            gameOver.SetActive(false);
         }
         
         private void Start()
@@ -78,8 +88,29 @@ namespace Player
             _isDead = true;
             _playerAnimation.SetDeathTrigger();
             cinemachineManager.MakePlayerDeathCinemachinePriority();
+            inputManager.OnDeath();
+            _rigidbody2D.bodyType = RigidbodyType2D.Static;
+            _collider.enabled = false;
+            _deathParticles.Play();
+            StartCoroutine(ScaleDownMask());
         }
-        
+
+        private IEnumerator ScaleDownMask()
+        {
+            yield return new WaitForSeconds(.45f);
+            var timeToScale = 1f;
+            var currentScale = _deathMask.gameObject.transform.localScale;
+            var targetScale = new Vector3(5, 5, 1);
+            var elapsedTime = 0f;
+            while (elapsedTime < timeToScale)
+            {
+                elapsedTime += Time.deltaTime;
+                _deathMask.gameObject.transform.localScale = Vector3.Lerp(currentScale, targetScale, elapsedTime / timeToScale);
+                yield return null;
+            }
+            gameOver.SetActive(true);
+        }
+
         private void CalculateRatioOfHealth()
         {
             // 1 * (current health / max health) = ratio of health remaining (0-1) 

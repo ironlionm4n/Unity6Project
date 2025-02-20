@@ -114,7 +114,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_playerHealth.IsDead)
         {
-            _rb.linearVelocity = Vector2.zero;
             return;
         }
         if(_playerHealth.RecoveringFromHit || !_canMove) return;
