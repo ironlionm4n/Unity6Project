@@ -32,11 +32,6 @@ public class InputManager : MonoBehaviour
         inputActions.Player.SweepAttack.canceled += SweepAttackOnCanceled();
     }
 
-    private void Update()
-    {
-        
-    }
-
     private Action<InputAction.CallbackContext> SweepAttackOnCanceled()
     {
         return _ => OnSweepAttackCanceled?.Invoke();
@@ -82,6 +77,11 @@ public class InputManager : MonoBehaviour
         inputActions.Player.SweepAttack.performed -= SweepAttackOnPerformed();
         inputActions.Player.SweepAttack.started -= SweepAttackOnStarted();
         inputActions.Player.SweepAttack.canceled -= SweepAttackOnCanceled();
+        inputActions.Player.Disable();
+    }
+    
+    public void OnDeath()
+    {
         inputActions.Player.Disable();
     }
 }
