@@ -11,6 +11,8 @@ public class Terry : MonoBehaviour
     [SerializeField] InputActionAsset terryInputActions;
     [SerializeField] private float maxMoveDelta = 0.05f;
     [SerializeField] private List<GameObject> party;
+    [SerializeField] private Direction startDirection;
+    
     private bool _isMoving;
     private Vector2 _movementInput;
     private InputAction _moveAction;
@@ -18,11 +20,12 @@ public class Terry : MonoBehaviour
     private Animator _animator;
     private static readonly int Horizontal = Animator.StringToHash("Horizontal");
     private static readonly int Vertical = Animator.StringToHash("Vertical");
-    private Vector3 _offset;
     private List<Animator> _partyAnimators;
     private Direction _lastMoveDirection;
     private Direction _nextMoveDirection;
     private Vector2 _lastMoveVector;
+    private Vector3 _offset;
+    private List<Vector3> _moveList;
 
     private void Awake()
     {
@@ -32,20 +35,29 @@ public class Terry : MonoBehaviour
         _moveAction.Enable();
         _animator = GetComponent<Animator>();
         _partyAnimators = new List<Animator>();
+        _offset = startDirection switch
+        {
+            Direction.Up => Vector2.down,
+            Direction.Down => Vector2.up,
+            Direction.Left => Vector2.right,
+            Direction.Right => Vector2.left,
+            _ => Vector2.zero
+        };
         foreach (var member in party)
         {
             _partyAnimators.Add(member.GetComponent<Animator>());
         }
         _lastMoveDirection = Direction.Right;
+        _moveList = new List<Vector3>();
     }
 
     private void Start()
     {
-        for(int i = 1; i < party.Count; i++)
-        {
-            party[i].SetActive(true);
-            party[i].transform.position = transform.position + _offset;
-        }
+        // for(int i = 0; i < party.Count; i++)
+        // {
+        //     party[i].SetActive(true);
+        //     party[i].transform.position = transform.position + _offset * (i + 1);
+        // }
     }
 
     private void OnDisable()
@@ -66,32 +78,19 @@ public class Terry : MonoBehaviour
         _isMoving = true;
         if (moveDirection.x != 0) {
             moveDirection.y = 0;
-            _nextMoveDirection = moveDirection.x > 0 ? Direction.Right : Direction.Left;
-            _offset = moveDirection.x > 0 ? Vector3.right : Vector3.left;
         } else if (moveDirection.y != 0) {
             moveDirection.x = 0;
-            _nextMoveDirection = moveDirection.y > 0 ? Direction.Up : Direction.Down;
-            _offset = moveDirection.y > 0 ? Vector3.up : Vector3.down;
         }
 
         if (moveDirection.sqrMagnitude > 0.5f)
         {
+            moveDirection.Normalize();
             _animator.SetFloat(Horizontal, moveDirection.x);
             _animator.SetFloat(Vertical, moveDirection.y);
-            _lastMoveDirection = moveDirection.x > 0 ? Direction.Right : moveDirection.x < 0 
-                ? Direction.Left : moveDirection.y > 0 ? Direction.Up : Direction.Down;
-            _lastMoveVector = _lastMoveDirection switch
-            {
-                Direction.Up => Vector2.up,
-                Direction.Down => Vector2.down,
-                Direction.Left => Vector2.left,
-                Direction.Right => Vector2.right,
-                _ => Vector2.zero
-            };
             
-            if (CanMoveInDirection(moveDirection.normalized))
+            if (CanMoveInDirection(moveDirection))
             {
-                StartCoroutine(MoveTerryAndParty(moveDirection.normalized));
+                StartCoroutine(MoveTerryAndParty(moveDirection));
             }
             else
             {
@@ -104,48 +103,33 @@ public class Terry : MonoBehaviour
         }
     }
 
-    private IEnumerator MoveTerryAndParty(Vector2 newDirectionVector)
+    private IEnumerator MoveTerryAndParty(Vector2 direction)
     {
-        // var origin = transform.position;
-        // var target = origin + (Vector3)direction.normalized;
-        // while (Vector2.Distance(transform.position, target) > Mathf.Epsilon)
-        // {
-        //     transform.position = Vector2.MoveTowards(transform.position, target, maxMoveDelta);
-        //     yield return null;
-        // }
-        // transform.position = target;
-        // _isMoving = false;
-
-        foreach (var partyAnimator in _partyAnimators)
-        {
-            if(CanMoveInDirection(_nextMoveDirection))
-            {
-                partyAnimator.SetFloat(Horizontal, newDirectionVector.x);
-                partyAnimator.SetFloat(Vertical, newDirectionVector.y);
-            }
-            else
-            {
-                partyAnimator.SetFloat(Horizontal, _lastMoveVector.x);
-                partyAnimator.SetFloat(Vertical, _lastMoveVector.y);
-            }
-        }
-        
         var origin = transform.position;
-        var target = origin + (Vector3)newDirectionVector.normalized;
+        _moveList.Add(origin);
+        var target = origin + (Vector3)direction;
+        var counter = 0;
+        // Move Terry
         while (Vector2.Distance(transform.position, target) > Mathf.Epsilon)
         {
             transform.position = Vector2.MoveTowards(transform.position, target, maxMoveDelta);
-            for (int i = 1; i < party.Count; i++)
-            {
-                party[i].transform.position = transform.position + _offset;
-            }
+
             yield return null;
         }
         transform.position = target;
-        for (int i = 1; i < party.Count; i++)
+        
+        for (int i = 0; i < Mathf.Min(party.Count, _moveList.Count); i++)
         {
-            party[i].transform.position = target + _offset;
+            var followerTarget = _moveList[ Mathf.Max(0, _moveList.Count - i - 1)];
+            party[i].GetComponent<PartyMonster>().StartMoving(followerTarget);
         }
+
+        
+        if(_moveList.Count > party.Count)
+        {
+            _moveList.RemoveAt(0);
+        }
+        
         _isMoving = false;
     }
 
