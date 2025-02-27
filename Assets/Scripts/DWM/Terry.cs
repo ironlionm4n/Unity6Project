@@ -12,6 +12,8 @@ public class Terry : MonoBehaviour
     [SerializeField] private float maxMoveDelta = 0.05f;
     [SerializeField] private List<GameObject> party;
     [SerializeField] private Direction startDirection;
+    [SerializeField] private InputActionReference pauseAction;
+    [SerializeField] private GameObject pauseMenu;
     
     private bool _isMoving;
     private Vector2 _movementInput;
@@ -33,6 +35,8 @@ public class Terry : MonoBehaviour
         _moveAction = _terryActionMap.FindAction("Move");
         _terryActionMap.Enable();
         _moveAction.Enable();
+        pauseAction.action.Enable();
+        pauseAction.action.performed += OnPause;
         _animator = GetComponent<Animator>();
         _partyAnimators = new List<Animator>();
         _offset = startDirection switch
@@ -51,6 +55,11 @@ public class Terry : MonoBehaviour
         _moveList = new List<Vector3>();
     }
 
+    private void OnPause(InputAction.CallbackContext obj)
+    {
+        pauseMenu.SetActive(!pauseMenu.activeSelf);
+    }
+
     private void Start()
     {
         // for(int i = 0; i < party.Count; i++)
@@ -64,6 +73,8 @@ public class Terry : MonoBehaviour
     {
         _terryActionMap.Disable();
         _moveAction.Disable();
+        pauseAction.action.Disable();
+        pauseAction.action.performed -= OnPause;
     }
 
     private void Update()
